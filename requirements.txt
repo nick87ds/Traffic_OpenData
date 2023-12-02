@@ -2,7 +2,6 @@ altair==5.1.2
 asttokens==2.4.1
 attrs==23.1.0
 backcall==0.2.0
-backports.zoneinfo==0.2.1
 blinker==1.7.0
 cachetools==5.3.2
 certifi==2023.11.17
