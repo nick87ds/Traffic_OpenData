@@ -2,41 +2,54 @@ import streamlit as st
 import pandas as pd
 import etl as etl
 
-# def display_table1(filtered_values):
-#     data1 = {
-#         'Column 1': [1, 2, 3, 4],
-#         'Column 2': ['A', 'B', 'C', 'D']
-#     }
-#     df1 = pd.DataFrame(data1)
-    
-#     if filtered_values:
-#         filtered_df = df1[df1['Column 2'].isin(filtered_values)]
-#         st.dataframe(filtered_df)
-#     else:
-#         st.dataframe(df1)
 
-st.title('Streamlit Template')
+def text_input_form():
+    str_fermate = st.text_input('Inserisci un testo per filtrare la o le fermate di interesse separate da |', '')
 
-# options = ['A', 'B', 'C']
-# default_value = ['A']  # Default value set to 'A'
-# selected_values = st.multiselect('Select values to filter Table 1', options, default=default_value)
+    if len(str_fermate) == 0:
+        str_fermate = 'Venez'
 
-button_clicked = st.button('Display Tables')
+    return str_fermate
 
-if button_clicked:
 
-    df = etl.download_extract_data()
+def text_input_form_destination():
+    str_fermate = st.text_input('Inserisci un testo per filtrare la o le fermate di destinazione separate da |', '')
 
-    rome_now = etl.get_datetime_now()
+    if len(str_fermate) == 0:
+        str_fermate = 'TERMINI \(MA-MB-FS\)|Torino'
 
-    df = etl.transform_data(df, 
-                            id_tragitto=etl.id_tragitto, 
-                            rome_timezone=etl.rome_timezone)
-    
-    df = etl.prepare_for_table(df, rome_now)
+    return str_fermate
 
-    st.markdown("---")
-    st.header('Table 1')
-    # display_table1(selected_values)
 
-    st.dataframe(df)
+def main():
+
+    st.title('Roma Bus')
+
+    selected_paline_name = text_input_form()
+    selected_paline_destination_name = text_input_form_destination()
+
+    button_clicked = st.button('Display Bus')
+
+    if button_clicked:
+
+        Fermate_ritorno = etl.get_fermata(etl.id_tragitto, selected_paline_name)
+        Destinazioni_ritorno = etl.get_fermata(etl.id_tragitto, selected_paline_destination_name)
+
+        df = etl.download_extract_data()
+
+        rome_now = etl.get_datetime_now()
+
+        df = etl.transform_data(df, 
+                                id_tragitto=etl.id_tragitto, 
+                                rome_timezone=etl.rome_timezone)
+        
+        df = etl.prepare_for_table(df, rome_now, Fermate_ritorno, Destinazioni_ritorno)
+
+        st.markdown("---")
+        st.header('Tabella Bus')
+
+        st.dataframe(df)
+
+
+if __name__ == '__main__':
+    main()

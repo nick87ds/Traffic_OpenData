@@ -4,18 +4,25 @@ import urllib.request
 from datetime import datetime
 import pytz
 
-id_tragitto = {
-    "72386" : "TERMINI (MA-MB-FS)",
-    "72044" : "TERMINI (MA-MB-FS)",
-    "73365" : "TERMINI (MA-MB-FS)",
-    "70031" : "REPUBBLICA (MA)",
-    "73992" : "P.ZA STAZIONE S. PIETRO (FL)",
-    "70078" : "P.ZA VENEZIA",
-    "72983" : "P.ZA VENEZIA",
-    "70084" : "NAZIONALE/TORINO",
-    "70032" : "NAZIONALE/TORINO"
+import json
 
-}
+# id_tragitto = {
+#     "72386" : "TERMINI (MA-MB-FS)",
+#     "72044" : "TERMINI (MA-MB-FS)",
+#     "73365" : "TERMINI (MA-MB-FS)",
+#     "70031" : "REPUBBLICA (MA)",
+#     "73992" : "P.ZA STAZIONE S. PIETRO (FL)",
+#     "70078" : "P.ZA VENEZIA",
+#     "72983" : "P.ZA VENEZIA",
+#     "70084" : "NAZIONALE/TORINO",
+#     "70032" : "NAZIONALE/TORINO"
+
+# }
+
+
+with open('id_paline_fermata.json', 'r') as fp:
+    id_tragitto = json.load(fp)
+
 
 rome_timezone = pytz.timezone('Europe/Rome')
 
@@ -96,11 +103,24 @@ def transform_data(df:pd.DataFrame, id_tragitto:dict, rome_timezone=rome_timezon
 
     return df
 
+def get_fermata(dict_fermate:dict, nome_fermata:str) -> list:
 
-def prepare_for_table(df:pd.DataFrame, rome_now):
+    df_tragitto = pd.DataFrame.from_dict(dict_fermate, \
+                                         orient='index', columns=['nome_fermata'])
+
+    mask = df_tragitto.nome_fermata.str.contains(nome_fermata,  case=False)
+    lista_fermate = df_tragitto[mask].nome_fermata.unique().tolist()
+
+    return lista_fermate
+
+
+
+
+
+def prepare_for_table(df:pd.DataFrame, rome_now, Fermate_ritorno, Destinazioni_ritorno):
     
-    Fermate_ritorno = ["P.ZA VENEZIA", "ARA COELI/PIAZZA VENEZIA"]
-    Destinazioni_ritorno = ["TERMINI (MA-MB-FS)", "NAZIONALE/TORINO"]
+    # Fermate_ritorno = ["P.ZA VENEZIA", "ARA COELI/PIAZZA VENEZIA"]
+    # Destinazioni_ritorno = ["TERMINI (MA-MB-FS)", "NAZIONALE/TORINO"]
 
     df_valid = df.query("Arrivo > @rome_now and not Cancellato").dropna().copy()
 
